@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#3d0f1f">
+<title>Happy Birthday — A Little Something For You</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Petit+Formal+Script&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --wine-deep:#3d0f1f;
+    --wine:#5c1930;
+    --wine-light:#7a2540;
+    --cream:#f8f1e2;
+    --cream-2:#efe4cd;
+    --paper:#fffaf0;
+    --gold:#c79a55;
+    --gold-soft:#e2c48a;
+    --ink:#3a1420;
+    --ink-soft:#6b4152;
+    --rose:#d99aa8;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Jost', sans-serif;
+    background:var(--cream);
+    color:var(--ink);
+    overflow-x:hidden;
+  }
+
+  /* ---------- shared decorative texture ---------- */
+  .dots{
+    position:absolute; inset:0; pointer-events:none; opacity:.5;
+    background-image: radial-gradient(currentColor 1px, transparent 1.4px);
+    background-size:26px 26px;
+  }
+  .bg-wine .dots{ color:rgba(248,241,226,.09); }
+  .bg-cream .dots{ color:rgba(92,25,48,.07); }
+
+  .star-svg{ position:absolute; opacity:.55; }
+
+  /* ---------- slide shell ---------- */
+  .slide{
+    position:relative;
+    min-height:100vh;
+    min-height:100dvh;
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    padding:70px 24px;
+    overflow:hidden;
+    text-align:center;
+  }
+  .bg-wine{ background:linear-gradient(180deg,var(--wine-deep),var(--wine) 60%,var(--wine-deep)); color:var(--cream); }
+  .bg-cream{ background:var(--cream); color:var(--ink); }
+
+  .slide-inner{ position:relative; z-index:2; max-width:640px; width:100%; }
+
+  .eyebrow{
+    font-size:.8rem;
+    letter-spacing:.03em;
+    color:var(--gold-soft);
+    margin:0 0 10px;
+    font-style:italic;
+  }
+  .bg-cream .eyebrow{ color:var(--ink-soft); }
+
+  h2{
+    font-family:'Playfair Display', serif;
+    font-weight:600;
+    font-size:clamp(1.6rem, 5vw, 2.4rem);
+    line-height:1.2;
+    margin:0 0 22px;
+  }
+  .script{
+    font-family:'Petit Formal Script', cursive;
+    font-weight:400;
+    color:var(--gold);
+    font-size:1.25em;
+  }
+  .bg-wine .script{ color:var(--gold-soft); }
+
+  p{ line-height:1.75; font-size:1rem; margin:0 0 16px; }
+  .lede{ font-size:1.05rem; color:var(--ink-soft); }
+  .bg-wine .lede{ color:var(--cream); opacity:.85; }
+
+  .reveal{ opacity:0; transform:translateY(24px); transition:opacity .8s ease, transform .8s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ---------- nav dots ---------- */
+  .navdots{
+    position:fixed; right:16px; top:50%; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:10px; z-index:50;
+  }
+  .navdots button{
+    width:8px; height:8px; border-radius:50%; border:1px solid var(--gold);
+    background:transparent; padding:0; cursor:pointer; opacity:.55;
+    transition:all .3s ease;
+  }
+  .navdots button.active{ background:var(--gold); opacity:1; transform:scale(1.3); }
+  @media (max-width:640px){ .navdots{ right:8px; gap:7px; } .navdots button{ width:6px; height:6px; } }
+
+  /* ---------- photo placeholder ---------- */
+  .ph{
+    position:relative;
+    background:
+      repeating-linear-gradient(135deg, #e9e0cd 0 10px, #e2d7bf 10px 20px);
+    display:flex; align-items:center; justify-content:center;
+    color:#a9946f;
+    overflow:hidden;
+  }
+  .ph svg{ width:26%; height:26%; opacity:.7; }
+  .ph img{
+    position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; cursor:zoom-in;
+  }
+
+  /* ---------- lightbox ---------- */
+  .lightbox{
+    position:fixed; inset:0; z-index:100;
+    background:rgba(20,6,12,.9);
+    display:none; align-items:center; justify-content:center;
+    padding:30px; cursor:zoom-out;
+    opacity:0; transition:opacity .25s ease;
+  }
+  .lightbox.open{ display:flex; opacity:1; }
+  .lightbox img{
+    max-width:min(90vw,520px); max-height:85vh;
+    border-radius:3px; box-shadow:0 24px 60px rgba(0,0,0,.55);
+  }
+
+  /* ---------- polaroid ---------- */
+  .polaroid{
+    background:var(--paper);
+    padding:10px 10px 30px;
+    box-shadow:0 10px 24px rgba(0,0,0,.28);
+    display:inline-block;
+    border-radius:2px;
+  }
+  .polaroid .ph{ width:100%; aspect-ratio:4/5; }
+  .polaroid figcaption{
+    font-family:'Petit Formal Script', cursive;
+    font-size:1.05rem;
+    color:#4a3626;
+    margin-top:8px;
+    text-align:center;
+  }
+  .tape{
+    position:absolute; width:52px; height:20px;
+    background:rgba(226,196,138,.55);
+    border:1px solid rgba(255,255,255,.4);
+    top:-10px; left:50%; transform:translateX(-50%) rotate(-3deg);
+    box-shadow:0 2px 4px rgba(0,0,0,.15);
+  }
+
+  /* ============ SECTION 1 — COVER ============ */
+  .cover-photo{ width:min(58vw,220px); margin:0 auto 22px; transform:rotate(-3deg); }
+  .cover-name{
+    font-family:'Playfair Display', serif; font-style:italic; font-weight:600;
+    font-size:clamp(1.8rem,7vw,2.8rem);
+    color:var(--cream);
+    margin:6px 0;
+  }
+  .cover-date{ letter-spacing:.06em; font-size:.8rem; color:var(--gold-soft); margin-bottom:22px; }
+  .cover-quote{ font-style:italic; color:var(--rose); font-size:1rem; max-width:420px; margin:0 auto; }
+  .heart-row{ margin-top:26px; font-size:1rem; color:var(--gold-soft); letter-spacing:.4em; }
+
+  /* ============ SECTION 2 — LETTER INTRO ============ */
+  .avatar-row{ display:flex; justify-content:center; gap:22px; margin-top:36px; }
+  .avatar{
+    width:64px; height:64px; border-radius:50%; overflow:hidden;
+    border:3px solid var(--paper); box-shadow:0 6px 14px rgba(0,0,0,.15);
+    position:relative;
+  }
+  .avatar .ph{ width:100%; height:100%; }
+  .avatar .emoji{
+    position:absolute; bottom:-6px; right:-6px; font-size:1.1rem;
+    background:var(--paper); border-radius:50%; padding:2px 3px;
+    box-shadow:0 2px 4px rgba(0,0,0,.2);
+  }
+
+  /* ============ SECTION 3 — FAVORITE MOMENTS ============ */
+  .strip{ display:flex; justify-content:center; gap:14px; flex-wrap:wrap; margin-top:10px; }
+  .strip .polaroid{ width:150px; }
+  .strip .polaroid:nth-child(1){ transform:rotate(-6deg); }
+  .strip .polaroid:nth-child(2){ transform:rotate(3deg); margin-top:14px; }
+  .strip .polaroid:nth-child(3){ transform:rotate(-2deg); }
+
+  /* ============ SECTION 4 — SONG ============ */
+  .vinyl-wrap{ display:flex; justify-content:center; margin:14px 0 26px; cursor:pointer; }
+  .vinyl{ width:210px; height:210px; animation:spin 9s linear infinite; }
+  .vinyl-label-photo{ cursor:zoom-in; }
+  .vinyl.spin{ animation-duration:3s; }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .song-seek{
+    -webkit-appearance:none; appearance:none;
+    width:220px; max-width:80vw; height:4px; border-radius:2px;
+    margin:18px auto 4px; display:block; outline:none; cursor:pointer;
+    background:rgba(58,20,32,.15);
+  }
+  .song-seek::-webkit-slider-runnable-track{ height:4px; border-radius:2px; background:transparent; }
+  .song-seek::-moz-range-track{ height:4px; border-radius:2px; background:transparent; }
+  .song-seek::-webkit-slider-thumb{
+    -webkit-appearance:none; width:14px; height:14px; margin-top:-5px;
+    border-radius:50%; background:var(--wine); cursor:pointer;
+    box-shadow:0 2px 6px rgba(0,0,0,.35);
+  }
+  .song-seek::-moz-range-thumb{
+    width:14px; height:14px; border-radius:50%; background:var(--wine);
+    border:none; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.35);
+  }
+  .song-time{
+    display:flex; justify-content:space-between; width:220px; max-width:80vw;
+    margin:0 auto; font-size:.7rem; color:var(--ink-soft); opacity:.75;
+  }
+  .song-title{ font-family:'Playfair Display', serif; font-style:italic; font-size:1.2rem; margin-bottom:4px; }
+  .song-sub{ font-size:.85rem; color:var(--ink-soft); }
+  .song-hint{ font-size:.8rem; color:var(--ink-soft); margin-top:16px; opacity:.8; }
+
+  /* ============ SECTION 5 — REASONS ============ */
+  .reasons-grid{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:22px 16px;
+    margin-top:10px;
+  }
+  .reason{ display:flex; flex-direction:column; align-items:center; gap:8px; }
+  .reason .avatar{ width:72px; height:72px; }
+  .reason span{ font-size:.82rem; color:var(--ink-soft); line-height:1.3; }
+  @media (max-width:480px){ .reasons-grid{ grid-template-columns:repeat(2,1fr); } }
+
+  /* ============ SECTION 6 — THREE WORDS ============ */
+  .words-row{ display:flex; justify-content:center; gap:16px; flex-wrap:wrap; margin-top:10px; }
+  .words-row .polaroid{ width:140px; }
+  .words-row .polaroid figcaption{ text-transform:lowercase; font-size:1.3rem; color:var(--wine); }
+
+  /* ============ SECTION 7 — LETTER FOR YOU ============ */
+  .letter-wrap{ display:flex; flex-direction:column; gap:22px; align-items:center; text-align:left; }
+  .letter-photo-carousel{ position:relative; width:150px; flex:none; }
+  .carousel-track{ display:flex; transition:transform .5s cubic-bezier(.65,0,.35,1); }
+  .carousel-slide{ flex:0 0 100%; }
+  .carousel-track{ touch-action:pan-y; cursor:grab; }
+  .carousel-track:active{ cursor:grabbing; }
+  .carousel-dots{ display:flex; gap:6px; justify-content:center; margin-top:12px; }
+  .carousel-dots .dot{ width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.35); cursor:pointer; transition:background .3s ease; }
+  .carousel-dots .dot.active{ background:var(--gold-soft); }
+  .letter-card{
+    flex:1; min-width:240px; max-width:340px;
+    background:var(--paper); color:var(--ink);
+    padding:26px 24px 18px; border-radius:2px;
+    box-shadow:0 16px 32px rgba(0,0,0,.35);
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+    min-height:190px; display:flex; flex-direction:column; justify-content:space-between;
+    text-align:left;
+  }
+  .letter-page{ display:none; opacity:0; transform:translateX(14px); transition:opacity .35s ease, transform .35s ease; }
+  .letter-page.active{ display:block; opacity:1; transform:translateX(0); }
+  .letter-page p{ font-size:.95rem; color:var(--ink); }
+  .signature{ font-family:'Petit Formal Script', cursive; font-size:1.4rem; color:var(--wine); margin-top:10px; }
+  .letter-pagination{ display:flex; gap:6px; justify-content:center; margin-top:16px; }
+  .letter-pagination .dot{ width:6px; height:6px; border-radius:50%; background:rgba(58,20,32,.22); transition:background .3s ease; }
+  .letter-pagination .dot.active{ background:var(--wine); }
+  .letter-hint{ font-size:.72rem; color:var(--ink-soft); text-align:center; margin-top:8px; opacity:.75; }
+
+  /* ============ SECTION 8 — LITTLE THINGS ============ */
+  .corkboard{ display:flex; gap:18px; justify-content:center; align-items:flex-start; flex-wrap:wrap; margin-top:14px; }
+  .note{
+    background:var(--paper); padding:16px 16px 20px; width:140px;
+    box-shadow:0 8px 18px rgba(0,0,0,.15); font-size:.82rem; color:#4a3626;
+    text-align:left; position:relative;
+  }
+  .note:nth-child(odd){ transform:rotate(-4deg); }
+  .note:nth-child(even){ transform:rotate(3deg); margin-top:16px; }
+  .note-title{ font-family:'Petit Formal Script', cursive; font-size:1.1rem; color:var(--wine); display:block; margin-bottom:6px; }
+
+  footer{
+    text-align:center; padding:34px 20px 44px;
+    background:var(--wine-deep); color:var(--gold-soft);
+    font-size:.82rem; font-style:italic;
+  }
+
+  /* ---------- confetti ---------- */
+  .confetti{ position:fixed; top:-12px; z-index:80; pointer-events:none; animation:fall linear forwards; }
+  @keyframes fall{ to{ transform:translateY(112vh) rotate(400deg); opacity:.9; } }
+
+  .edit-note{
+    position:fixed; bottom:10px; left:10px; z-index:60;
+    background:rgba(61,15,31,.92); color:var(--cream);
+    font-size:.68rem; padding:7px 10px; border-radius:6px; max-width:230px;
+    line-height:1.4; opacity:.85;
+  }
+
+  /* ---------- floating hearts background ---------- */
+  .hearts-bg{
+    position:fixed; inset:0; z-index:1;
+    pointer-events:none; overflow:hidden;
+  }
+  .floating-heart{
+    position:absolute; bottom:-10vh;
+    animation:floatUp linear infinite;
+    will-change:transform, opacity;
+  }
+  @keyframes floatUp{
+    0%{ transform:translateY(0) translateX(0) rotate(0deg); opacity:0; }
+    10%{ opacity:.85; }
+    50%{ transform:translateY(-55vh) translateX(var(--drift,20px)) rotate(180deg); }
+    90%{ opacity:.6; }
+    100%{ transform:translateY(-110vh) translateX(0) rotate(360deg); opacity:0; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hearts-bg" id="heartsBg"></div>
+
+<div class="navdots" id="navdots"></div>
+
+<!-- ============ 1. COVER ============ -->
+<section class="slide bg-wine" id="s1" data-label="Cover">
+  <div class="dots"></div>
+  <div class="slide-inner">
+    <div class="cover-photo polaroid reveal">
+      <div class="tape"></div>
+      <div class="ph"><img src="photos/cover.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.4"/></svg>
+      </div>
+      <figcaption>Their Name</figcaption>
+    </div>
+    <p class="eyebrow reveal">happy birthday</p>
+    <h2 class="cover-name reveal">Their Name</h2>
+    <p class="cover-date reveal">27 / 10 / 2026</p>
+    <p class="cover-quote reveal">Happy birthday, my love — a little letter made just for you.</p>
+    <div class="heart-row reveal">♡ ♡ ♡</div>
+  </div>
+</section>
+
+<!-- ============ 2. REASONS ============ -->
+<section class="slide bg-cream" id="s5" data-label="Reasons">
+  <div class="dots"></div>
+  <div class="slide-inner">
+    <h2 class="reveal">reasons <span class="script">I love you</span></h2>
+    <div class="reasons-grid reveal">
+      <div class="reason"><div class="avatar"><div class="ph"><img src="photos/reason-1.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.4"/></svg></div></div><span>Your smile</span></div>
+      <div class="reason"><div class="avatar"><div class="ph"><img src="photos/reason-2.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.4"/></svg></div></div><span>Your hugs</span></div>
+      <div class="reason"><div class="avatar"><div class="ph"><img src="photos/reason-3.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.4"/></svg></div></div><span>Your patience</span></div>
+      <div class="reason"><div class="avatar"><div class="ph"><img src="photos/reason-4.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.4"/></svg></div></div><span>Your kindness</span></div>
+      <div class="reason"><div class="avatar"><div class="ph"><img src="photos/reason-5.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.4"/></svg></div></div><span>The way you make me laugh</span></div>
+      <div class="reason"><div class="avatar"><div class="ph"><img src="photos/reason-6.jpg" alt="" onerror="this.style.display='none'" onload="this.nextElementSibling.style.display='none'"><svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="3.2" stroke="currentColor" stroke-width="1.4"/><path d="M5 19c1.2-3.6 4-5.4 7-5.4s5.8 1.8 7 5.4" stroke="currentColor" stroke-width="1.4"/></svg></div></div><span>Everything about you</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. LITTLE THINGS ============ -->
+<section class="slide bg-cream" id="s8" data-label="Little Things">
+  <div class="dots"></div>
+  <div class="slide-inner">
+    <h2 class="reveal">The Little Things You Do That Make Me <span class="script">Smile</span></h2>
+    <div class="corkboard reveal">
+      <div class="note"><span class="note-title">the little things</span>the way you hum while you cook</div>
+      <div class="note"><span class="note-title">the little things</span>how you always save me the last bite</div>
+      <div class="note"><span class="note-title">the little things</span>your terrible jokes, every time</div>
+    </div>
+  </div>
+</section>
+
+<footer>made with love, just for you</footer>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt=""></div>
+
+
+
+<script>
+  // floating hearts across the whole page
+  const heartsBg = document.getElementById('heartsBg');
+  const heartSymbols = ['♡','❤','💕'];
+  const heartColors = ['#e2c48a','#d99aa8','#f8f1e2','#c79a55'];
+  const HEART_COUNT = 18;
+  for(let i=0;i<HEART_COUNT;i++){
+    const h = document.createElement('span');
+    h.className = 'floating-heart';
+    h.textContent = heartSymbols[Math.floor(Math.random()*heartSymbols.length)];
+    h.style.left = Math.random()*100 + 'vw';
+    h.style.fontSize = (12 + Math.random()*18) + 'px';
+    h.style.color = heartColors[Math.floor(Math.random()*heartColors.length)];
+    h.style.setProperty('--drift', (Math.random()*60-30) + 'px');
+    h.style.animationDuration = (12 + Math.random()*14) + 's';
+    h.style.animationDelay = (Math.random()*-20) + 's';
+    heartsBg.appendChild(h);
+  }
+
+  // reveal-on-scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold:.25 });
+  revealEls.forEach(el=>io.observe(el));
+
+  // nav dots
+  const sections = document.querySelectorAll('.slide');
+  const navdots = document.getElementById('navdots');
+  sections.forEach(sec=>{
+    const b = document.createElement('button');
+    b.setAttribute('aria-label', sec.dataset.label);
+    b.addEventListener('click', ()=> sec.scrollIntoView({behavior:'smooth'}));
+    navdots.appendChild(b);
+  });
+  const dots = navdots.querySelectorAll('button');
+  const navIo = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){
+        const idx = [...sections].indexOf(e.target);
+        dots.forEach(d=>d.classList.remove('active'));
+        dots[idx].classList.add('active');
+      }
+    });
+  }, { threshold:.5 });
+  sections.forEach(s=>navIo.observe(s));
+
+  // photos — tap to view full size
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightboxImg');
+  document.querySelectorAll('.ph img').forEach(img=>{
+    img.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      if(img.style.display === 'none' || !img.complete || img.naturalWidth === 0) return; // no photo added yet
+      lightboxImg.src = img.src;
+      lightbox.classList.add('open');
+    });
+  });
+  lightbox.addEventListener('click', ()=> lightbox.classList.remove('open'));
+
+  // gentle confetti burst on cover load
+  function confettiBurst(){
+    const colors = ['#c79a55','#e2c48a','#d99aa8','#f8f1e2'];
+    for(let i=0;i<26;i++){
+      const c = document.createElement('div');
+      c.className='confetti';
+      c.style.left = Math.random()*100+'vw';
+      c.style.background = colors[Math.floor(Math.random()*colors.length)];
+      c.style.width = (5+Math.random()*5)+'px';
+      c.style.height = (9+Math.random()*7)+'px';
+      c.style.borderRadius = Math.random()>.5 ? '50%' : '2px';
+      c.style.animationDuration = (2.4+Math.random()*1.6)+'s';
+      c.style.animationDelay = (Math.random()*.6)+'s';
+      document.body.appendChild(c);
+      setTimeout(()=>c.remove(), 4600);
+    }
+  }
+  setTimeout(confettiBurst, 500);
+</script>
+
+</body>
+</html>
