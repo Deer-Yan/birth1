@@ -42,18 +42,31 @@ body{
 .bg-blush .dots{ color:rgba(232,168,168,.16); }
 .bg-cream .dots{ color:rgba(157,191,166,.16); }
 
-/* ---------- slide shell ---------- */
+/* ---------- slide shell (single-page mode: only .active shows) ---------- */
 .slide{
   position:relative;
   min-height:100vh; min-height:100dvh;
   width:100%;
-  display:flex; flex-direction:column;
+  display:none;
+  flex-direction:column;
   align-items:center; justify-content:center;
   padding:70px 24px; overflow:hidden; text-align:center;
 }
+.slide.active{ display:flex; }
 .bg-blush{ background:linear-gradient(170deg,var(--blush) 0%,var(--blush-2) 55%,var(--petal) 100%); }
 .bg-cream{ background:linear-gradient(170deg,var(--cream) 0%,#f3f7f4 60%,var(--sage) 140%); }
 .slide-inner{ position:relative; z-index:2; max-width:640px; width:100%; }
+
+.back-btn{
+  position:absolute; top:22px; left:22px; z-index:5;
+  display:flex; align-items:center; gap:6px;
+  background:var(--cream); border:none; border-radius:999px;
+  padding:8px 16px 8px 12px; font-family:'Quicksand', sans-serif;
+  font-weight:600; font-size:.85rem; color:var(--rose-deep);
+  box-shadow:0 6px 14px rgba(212,139,139,.25);
+  cursor:pointer; -webkit-tap-highlight-color:transparent;
+}
+.back-btn:active{ transform:scale(.95); }
 
 .eyebrow{
   font-family:'Caveat', cursive; font-size:1.3rem;
@@ -68,18 +81,6 @@ h2{
 p{ line-height:1.75; font-size:1rem; margin:0 0 16px; }
 .reveal{ opacity:0; transform:translateY(22px); transition:opacity .8s ease, transform .8s ease; }
 .reveal.in{ opacity:1; transform:translateY(0); }
-
-/* ---------- nav dots ---------- */
-.navdots{
-  position:fixed; right:16px; top:50%; transform:translateY(-50%);
-  display:flex; flex-direction:column; gap:10px; z-index:50;
-}
-.navdots button{
-  width:9px; height:9px; border-radius:50%; border:1.5px solid var(--rose);
-  background:transparent; padding:0; cursor:pointer; opacity:.5; transition:all .3s ease;
-}
-.navdots button.active{ background:var(--rose); opacity:1; transform:scale(1.35); }
-@media (max-width:640px){ .navdots{ right:8px; gap:8px; } .navdots button{ width:7px; height:7px; } }
 
 /* ---------- photo placeholder ---------- */
 .ph{
@@ -119,7 +120,49 @@ p{ line-height:1.75; font-size:1rem; margin:0 0 16px; }
   border-radius:2px;
 }
 
-/* ============ 1. COVER ============ */
+/* ============ 0. MENU (hub) ============ */
+.bg-menu{
+  background:
+    repeating-linear-gradient(0deg, rgba(212,139,139,.16) 0 2px, transparent 2px 26px),
+    repeating-linear-gradient(90deg, rgba(212,139,139,.16) 0 2px, transparent 2px 26px),
+    repeating-linear-gradient(0deg, rgba(232,168,168,.4) 0 13px, transparent 13px 26px),
+    repeating-linear-gradient(90deg, rgba(232,168,168,.4) 0 13px, transparent 13px 26px),
+    var(--blush);
+  position:relative;
+}
+.bg-menu::before, .bg-menu::after{
+  content:''; position:absolute; left:0; right:0; height:22px; z-index:1;
+  background-image: radial-gradient(circle at 50% 0, transparent 9px, var(--cream) 9.5px);
+  background-size:22px 22px; background-repeat:repeat-x;
+}
+.bg-menu::before{ top:0; }
+.bg-menu::after{ bottom:0; transform:rotate(180deg); }
+
+.menu-title{ font-family:'Caveat', cursive; font-weight:600; color:var(--rose-deep); font-size:clamp(1.6rem,6vw,2.2rem); margin:0 0 6px; }
+.menu-sub{ font-size:.85rem; color:var(--ink-soft); margin:0 0 30px; animation:hintPulse 1.8s ease-in-out infinite; }
+
+.menu-hearts{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; }
+.heart-btn{
+  position:relative; width:118px; height:106px; border:none; background:none;
+  cursor:pointer; padding:0; -webkit-tap-highlight-color:transparent;
+  transition:transform .2s ease;
+}
+.heart-btn:active{ transform:scale(.92); }
+.heart-btn:nth-child(1){ transform:rotate(-6deg); }
+.heart-btn:nth-child(2){ transform:rotate(3deg); margin-top:14px; }
+.heart-btn:nth-child(3){ transform:rotate(-3deg); }
+.heart-shape{
+  width:100%; height:100%;
+  clip-path:path('M59,98 C59,98 5,62 5,29 C5,10 22,0 38,7 C48,11 56,20 59,28 C62,20 70,11 80,7 C96,0 113,10 113,29 C113,62 59,98 59,98 Z');
+  background:var(--cream);
+  box-shadow:0 8px 18px rgba(212,139,139,.28);
+  display:flex; align-items:center; justify-content:center;
+}
+.heart-shape svg{ width:34%; height:34%; color:var(--rose-deep); }
+.heart-caption{
+  font-family:'Caveat', cursive; font-size:1.05rem; color:var(--ink);
+  margin-top:6px; display:block;
+}
 .cover-photo{ position:relative; width:min(58vw,210px); margin:0 auto 24px; transform:rotate(-3deg); }
 .cover-name{
   font-family:'Caveat', cursive; font-weight:600;
@@ -307,10 +350,38 @@ html.intro-lock, html.intro-lock body{ overflow:hidden; height:100%; }
 </div>
 
 <div class="hearts-bg" id="heartsBg"></div>
-<div class="navdots" id="navdots"></div>
+
+<!-- ============ 0. MENU (hub) ============ -->
+<section class="slide bg-menu active" id="menu" data-label="Menu">
+  <div class="slide-inner">
+    <p class="menu-title reveal in">These are for you</p>
+    <p class="menu-sub reveal in">tap a heart to open :)</p>
+    <div class="menu-hearts reveal in">
+      <button class="heart-btn" data-target="s1" aria-label="Open photo">
+        <span class="heart-shape">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h3l1.5-2h7L17 7h3a1 1 0 011 1v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8a1 1 0 011-1z" stroke="currentColor" stroke-width="1.6"/><circle cx="12" cy="13" r="3.4" stroke="currentColor" stroke-width="1.6"/></svg>
+        </span>
+        <span class="heart-caption">photo</span>
+      </button>
+      <button class="heart-btn" data-target="s2" aria-label="Open song">
+        <span class="heart-shape">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="8" cy="17" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M11 17V5l9-2v12" stroke="currentColor" stroke-width="1.6"/><circle cx="17" cy="15" r="3" stroke="currentColor" stroke-width="1.6"/></svg>
+        </span>
+        <span class="heart-caption">our song</span>
+      </button>
+      <button class="heart-btn" data-target="s3" aria-label="Open little things">
+        <span class="heart-shape">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M12 21s-7-4.35-9.5-8.5C.8 9 2.4 5.5 6 5.5c2 0 3.5 1.2 4.2 2.6.7-1.4 2.2-2.6 4.2-2.6 3.6 0 5.2 3.5 3.5 7C19.5 16.65 12 21 12 21z" stroke="currentColor" stroke-width="1.6"/></svg>
+        </span>
+        <span class="heart-caption">little things</span>
+      </button>
+    </div>
+  </div>
+</section>
 
 <!-- ============ 1. COVER ============ -->
 <section class="slide bg-blush" id="s1" data-label="Cover">
+  <button class="back-btn" data-back aria-label="Back to menu">&#8592; back</button>
   <div class="dots"></div>
   <div class="slide-inner">
     <div class="cover-photo polaroid reveal">
@@ -328,6 +399,7 @@ html.intro-lock, html.intro-lock body{ overflow:hidden; height:100%; }
 
 <!-- ============ 2. SONG ============ -->
 <section class="slide bg-cream" id="s2" data-label="Song">
+  <button class="back-btn" data-back aria-label="Back to menu">&#8592; back</button>
   <div class="dots"></div>
   <div class="slide-inner">
     <h2 class="reveal">This <span class="script">song</span> reminds me of you</h2>
@@ -364,6 +436,7 @@ html.intro-lock, html.intro-lock body{ overflow:hidden; height:100%; }
 
 <!-- ============ 3. LITTLE THINGS ============ -->
 <section class="slide bg-blush" id="s3" data-label="Little Things">
+  <button class="back-btn" data-back aria-label="Back to menu">&#8592; back</button>
   <div class="dots"></div>
   <div class="slide-inner">
     <h2 class="reveal">The little things you do that make me <span class="script">smile</span></h2>
@@ -380,6 +453,11 @@ html.intro-lock, html.intro-lock body{ overflow:hidden; height:100%; }
 <div class="lightbox" id="lightbox"><img id="lightboxImg" src="" alt=""></div>
 
 <script>
+  // menu hearts — tap to open that page
+  document.querySelectorAll('.heart-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> showPage(btn.dataset.target));
+  });
+
   // intro envelope — tap the stamp to open, then reveal the site
   const introOverlay = document.getElementById('introOverlay');
   const envelope = document.getElementById('envelope');
@@ -415,33 +493,23 @@ html.intro-lock, html.intro-lock body{ overflow:hidden; height:100%; }
   for(let i=0;i<6;i++) setTimeout(spawnHeart, i*400);
   setInterval(spawnHeart, 1100);
 
-  // reveal on scroll
-  const revealEls = document.querySelectorAll('.reveal');
-  const io = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
-  }, { threshold:.25 });
-  revealEls.forEach(el=>io.observe(el));
-
-  // nav dots
-  const sections = document.querySelectorAll('.slide');
-  const navdots = document.getElementById('navdots');
-  sections.forEach(sec=>{
-    const b = document.createElement('button');
-    b.setAttribute('aria-label', sec.dataset.label);
-    b.addEventListener('click', ()=> sec.scrollIntoView({behavior:'smooth'}));
-    navdots.appendChild(b);
-  });
-  const dots = navdots.querySelectorAll('button');
-  const navIo = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting){
-        const idx = [...sections].indexOf(e.target);
-        dots.forEach(d=>d.classList.remove('active'));
-        dots[idx].classList.add('active');
-      }
+  // single-page navigation — show one section at a time
+  const allPages = document.querySelectorAll('.slide');
+  function showPage(id){
+    allPages.forEach(p=> p.classList.toggle('active', p.id===id));
+    window.scrollTo(0,0);
+    const target = document.getElementById(id);
+    const revealEls = target.querySelectorAll('.reveal');
+    revealEls.forEach(el=> el.classList.remove('in'));
+    requestAnimationFrame(()=>{
+      requestAnimationFrame(()=>{
+        revealEls.forEach(el=> el.classList.add('in'));
+      });
     });
-  }, { threshold:.5 });
-  sections.forEach(s=>navIo.observe(s));
+  }
+  document.querySelectorAll('[data-back]').forEach(btn=>{
+    btn.addEventListener('click', ()=> showPage('menu'));
+  });
 
   // photos — tap to view full size
   const lightbox = document.getElementById('lightbox');
